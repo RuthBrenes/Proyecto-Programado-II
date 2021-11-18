@@ -145,7 +145,7 @@ void creacionEInsercionArchTxtC(const ListaC *C, informacionColaborador *infoCol
 	Nodo *indice;
 	FILE *archivo; 
 	string ruta;
-	strcpy(ruta, "C:\\Users\\Ruth\\Desktop\\PP2\\InformacionColaboradores\\");
+	strcpy(ruta, ".\\InformacionColaboradores\\");
 	
 	strcat(ruta, infoColaborador->nombres);
 	strcpy(infoColaborador->tipoArchivo, ruta);
@@ -176,7 +176,7 @@ void registroBitacora(ListaC *C, informacionColaborador *infoColaborador)
 		{
 			FILE *archivo; 
 			string ruta;
-			strcpy(ruta, "C:\\Users\\Ruth\\Desktop\\PP2\\InformacionColaboradores\\");
+			strcpy(ruta, ".\\InformacionColaboradores\\");
 	
 			strcat(ruta, indice->dato.nombres);
 			strcpy(infoColaborador->tipoArchivo, ruta);
@@ -215,7 +215,7 @@ void creacionEInsercionArchTxtE(const ListaE *E, informacionEquipos *infoEquipos
 	Nodo *indice;
 	FILE *archivo; 
 	string ruta;
-	strcpy(ruta, "C:\\Users\\Ruth\\Desktop\\PP2\\InformacionEquipos\\");
+	strcpy(ruta, ".\\InformacionEquipos\\");
 	
 	strcat(ruta, infoEquipos->nombre);
 	strcpy(infoEquipos->tipoArchivo, ruta);
@@ -311,7 +311,7 @@ void insercionAristas(const ListaE *E, informacionEquipos *infoEquipos)
 		gets(infoEquipos->destino);
 		printf("\n");
 	
-		strcpy(ruta, "C:\\Users\\Ruth\\Desktop\\PP2\\InformacionEquipos\\");
+		strcpy(ruta, ".\\InformacionEquipos\\");
 		strcat(ruta, infoEquipos->origen);
 		strcpy(infoEquipos->tipoArchivo, ruta);
 		strcat(infoEquipos->tipoArchivo, ".txt");
@@ -333,7 +333,7 @@ void infoUnEquipo(ListaE *E, informacionEquipos *infoEquipos)
 	printf("Ingrese el nombre del equipo al cual desea ver la informacion: ");
 	gets(informacionEquipo);
 	
-	strcpy(ruta, "C:\\Users\\Ruth\\Desktop\\PP2\\InformacionEquipos\\");
+	strcpy(ruta, ".\\InformacionEquipos\\");
 	strcat(ruta, informacionEquipo);
 	strcpy(infoEquipos->tipoArchivo, ruta);
 	strcat(infoEquipos->tipoArchivo, ".txt");
@@ -358,8 +358,7 @@ int main()
 	E = listaEquipos();
 	informacionEquipos infoEq;
 	
-	
-    //insertarColaborador(C, infoCo);
+    insertarColaborador(C, infoCo);
     //mostrarListaColaboradores(C, &infoCo);
 	//registroBitacora(C, &infoCo);
     
