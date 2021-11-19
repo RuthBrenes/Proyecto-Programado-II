@@ -6,6 +6,9 @@
 typedef struct Nodo Nodo;
 typedef struct ListaC ListaC;
 typedef struct ListaE ListaE;
+typedef struct arista arista;
+typedef struct vertice vertice;
+typedef struct grafo grafo;
 typedef char string[200];
 
 typedef struct{
@@ -31,7 +34,7 @@ typedef struct{
 typedef struct{
 	int codigo;
 	string lugar;
-	string codigoPostal;
+	int codigoPostal;
 }lugaresDeDomicilio;
 
 typedef struct{
@@ -40,7 +43,7 @@ typedef struct{
 	int tiempoEnMinutos;
 	int distancia;
 	string tipoRuta;
-}informacionRutas;
+}informacionEtiquetas;
 
 struct Nodo
 {
@@ -59,6 +62,26 @@ struct ListaE
 	Nodo *inicio2;
 };
 
+struct grafo
+{
+	vertice *inicioG;
+};
+
+struct vertice
+{
+	vertice *siguiente;
+	arista *ady;
+	lugaresDeDomicilio datosDomicilio;
+};
+
+struct arista
+{
+	arista *siguiente;
+	vertice *ady;	
+	string nombre;
+};
+
+
 ListaC *listaColaborador(void)
 {
 	ListaC *C;
@@ -74,6 +97,8 @@ ListaE *listaEquipos(void)
 	E->inicio2 = NULL;
 	return E;
 }
+
+vertice *inicioG = NULL;
 
 void lecturaDatosInfoCo(informacionColaborador *infoColaborador);
 void creacionEInsercionArchTxtC(const ListaC *C, informacionColaborador *infoColaborador);
@@ -348,6 +373,125 @@ void infoUnEquipo(ListaE *E, informacionEquipos *infoEquipos)
 	fclose(archivo);
 }
 
+bool vacio()
+{
+	if(inicioG == NULL)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+void insertarArista(vertice *origen, vertice *destino);
+
+void lecturaDatosDomicilio(lugaresDeDomicilio *infoDomicilios)
+{
+		printf("\nIngrese el codigo: ");
+		scanf("%d", &infoDomicilios->codigo);
+		getchar();
+	
+		printf("\nIngrese el nombre del lugar: ");
+		gets(infoDomicilios->lugar);
+	
+		printf("\nIngrese el codigo postal: ");
+		scanf("%d", &infoDomicilios->codigoPostal);
+		getchar();
+		printf("\n");
+}	
+
+void insertarVertice(lugaresDeDomicilio infoDomicilios)
+{
+	int contador = 0;
+	int cantidadDomicilios;
+	
+	printf("¿Cuantos lugares de domicilio desea agregar? ");
+	scanf("%d", &cantidadDomicilios);
+	getchar();
+	
+	while(contador < cantidadDomicilios)
+	{
+		lecturaDatosDomicilio(&infoDomicilios);
+		vertice *nuevo = (vertice *)malloc(sizeof(vertice));
+		nuevo->datosDomicilio = infoDomicilios;
+		nuevo->siguiente = NULL;
+		nuevo->ady = NULL;
+
+		if(vacio())
+		{
+			inicioG = nuevo;
+		}
+		else
+		{
+			vertice *aux;
+			aux = inicioG;
+			while(aux->siguiente != NULL)
+			{
+				aux = aux->siguiente;
+			}
+			aux->siguiente = nuevo;
+		}
+		contador++;
+	}
+}
+
+vertice *getVertice(string nombre)
+{
+	vertice *aux;
+	aux = inicioG;
+
+	while(aux != NULL)
+	{
+		if(strcmp(aux->datosDomicilio.lugar, nombre) == 0)
+		{
+			return aux;
+		}
+		aux = aux->siguiente;
+	}
+	return NULL;
+}
+
+void insertarArista(vertice *origen, vertice *destino)
+{
+	arista *nueva = (arista *)malloc(sizeof(arista));
+	nueva->siguiente;
+	nueva->ady;
+	
+	arista *aux;
+	aux = origen->ady;
+	
+	if(aux == NULL)
+	{
+		origen->ady = nueva;
+		nueva->ady = destino;
+	}
+	else
+	{
+		while(aux->siguiente != NULL)
+		{
+			aux = aux->siguiente;
+		}
+		aux->siguiente = nueva;
+		nueva->ady = destino;
+	}
+}
+
+void insercionDomicilios()
+{
+	string origen;
+	string destino;
+	
+	printf("Ingrese el lugar de origen: ");
+	gets(origen);
+	
+	printf("Ingrese el lugar de destino: ");
+	gets(destino);
+	
+	insertarArista(getVertice(origen), getVertice(destino));
+}
+
 int main()
 {
     ListaC *C;
@@ -358,7 +502,9 @@ int main()
 	E = listaEquipos();
 	informacionEquipos infoEq;
 	
-    insertarColaborador(C, infoCo);
+	lugaresDeDomicilio infoDom;
+	
+    //insertarColaborador(C, infoCo);
     //mostrarListaColaboradores(C, &infoCo);
 	//registroBitacora(C, &infoCo);
     
@@ -367,6 +513,9 @@ int main()
     //mostrarListaEquipos(E, &infoEq);
     //infoUnEquipo(E, &infoEq);
     //tamano(E);
+    
+    //insertarVertice(infoDom);
+    //insercionDomicilios();
     
     return 0;
 }
