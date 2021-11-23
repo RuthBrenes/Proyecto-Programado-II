@@ -6,13 +6,15 @@
 typedef struct Nodo Nodo;
 typedef struct ListaC ListaC;
 typedef struct ListaE ListaE;
+typedef struct ListaL ListaL;
 typedef struct arista arista;
 typedef struct vertice vertice;
 typedef struct grafo grafo;
 typedef char string[200];
 
+
 typedef struct{
-    int cedula;
+    string cedula;
     string nombres;
     string apellidos;
     string correoElectronico;
@@ -29,20 +31,24 @@ typedef struct{
 	string tipoArchivo;
 	string origen;
 	string destino;
+	int tamano;
 }informacionEquipos;
 
 typedef struct{
 	int codigo;
 	string lugar;
 	int codigoPostal;
+	string tipoArchivo;
+	int tamano;
 }lugaresDeDomicilio;
 
 typedef struct{
-	string lugarOrigen;
-	string lugarDestino;
+	string origen;
+	string destino;
 	int tiempoEnMinutos;
 	int distancia;
 	string tipoRuta;
+	string tipoArchivo;
 }informacionEtiquetas;
 
 struct Nodo
@@ -62,6 +68,11 @@ struct ListaE
 	Nodo *inicio2;
 };
 
+struct ListaL
+{
+	Nodo *inicioL;
+};
+
 struct grafo
 {
 	vertice *inicioG;
@@ -72,13 +83,15 @@ struct vertice
 	vertice *siguiente;
 	arista *ady;
 	lugaresDeDomicilio datosDomicilio;
+	informacionEtiquetas datosEtiquetas;
+	string nombre;
 };
 
 struct arista
 {
 	arista *siguiente;
 	vertice *ady;	
-	string nombre;
+	informacionEtiquetas datosEtiquetas;
 };
 
 
@@ -98,11 +111,18 @@ ListaE *listaEquipos(void)
 	return E;
 }
 
+ListaL *listaLugares(void)
+{
+	ListaL *L;
+	L = (ListaL*) malloc(sizeof(ListaL));
+	L->inicioL = NULL;
+	return L;
+}
+
 vertice *inicioG = NULL;
 
 void lecturaDatosInfoCo(informacionColaborador *infoColaborador);
 void creacionEInsercionArchTxtC(const ListaC *C, informacionColaborador *infoColaborador);
-
 
 void insertarColaborador(ListaC *C, informacionColaborador infoColaborador)
 {
@@ -111,6 +131,7 @@ void insertarColaborador(ListaC *C, informacionColaborador infoColaborador)
 
 	printf("¿Cuantos colaboradores desea agregar? ");
 	scanf("%d", &cantidadColab);
+	getchar();
 	
 	infoColaborador.cantColaboradores = 1;
 	while(contador < cantidadColab)
@@ -145,8 +166,7 @@ void insertarColaborador(ListaC *C, informacionColaborador infoColaborador)
 void lecturaDatosInfoCo(informacionColaborador *infoColaborador)
 {
 	printf("\nInserte la cedula del colaborador %d: ", infoColaborador->cantColaboradores);
-	scanf("%d",&infoColaborador->cedula);
-	getchar();
+	gets(infoColaborador->cedula);
 	
 	printf("\nIngrese los nombres del colaborador %d: ", infoColaborador->cantColaboradores);
 	gets(infoColaborador->nombres);
@@ -172,46 +192,45 @@ void creacionEInsercionArchTxtC(const ListaC *C, informacionColaborador *infoCol
 	string ruta;
 	strcpy(ruta, ".\\InformacionColaboradores\\");
 	
-	strcat(ruta, infoColaborador->nombres);
+	strcat(ruta, infoColaborador->cedula);
 	strcpy(infoColaborador->tipoArchivo, ruta);
 	strcat(infoColaborador->tipoArchivo, ".txt");
 	
 	archivo = fopen(infoColaborador->tipoArchivo, "a+");
-	fprintf(archivo,"%d; %s; %s; %s; %s; %s;\n", infoColaborador->cedula, infoColaborador->nombres, infoColaborador->apellidos, infoColaborador->correoElectronico, infoColaborador->rol, infoColaborador->fechaCumpleanos);
+	fprintf(archivo,"%s; %s; %s; %s; %s; %s;\n", infoColaborador->cedula, infoColaborador->nombres, infoColaborador->apellidos, infoColaborador->correoElectronico, infoColaborador->rol, infoColaborador->fechaCumpleanos);
 }
 
 void registroBitacora(ListaC *C, informacionColaborador *infoColaborador)
 {
 	Nodo *indice;
-	int cedula;
+	string cedula;
+	string descripcion;
 	
 	printf("Ingrese la cedula del colaborador al que desea agregarle una observacion: ");
-	scanf("%d", &cedula);
-	getchar();
+	gets(cedula);
 	printf("\n");
 	
 	printf("Ingrese la observacion que desea agregar: ");
-	gets(infoColaborador->descripcion);
+	gets(descripcion);
+	printf("\n");
+	printf(".\n");
+	printf(".\n");
+	printf(".\n");
 	
 	indice = C->inicio;
 
-	while(indice != NULL)
-	{
-		if(indice->dato.cedula == cedula)
-		{
-			FILE *archivo; 
-			string ruta;
-			strcpy(ruta, ".\\InformacionColaboradores\\");
+	FILE *archivo; 
+	string ruta;
+	strcpy(ruta, ".\\InformacionColaboradores\\");
 	
-			strcat(ruta, indice->dato.nombres);
-			strcpy(infoColaborador->tipoArchivo, ruta);
-			strcat(infoColaborador->tipoArchivo, ".txt");
+	strcat(ruta, cedula);
+	strcpy(infoColaborador->tipoArchivo, ruta);
+	strcat(infoColaborador->tipoArchivo, ".txt");
 	
-			archivo = fopen(infoColaborador->tipoArchivo, "a+");
-			fprintf(archivo,"%s\n", infoColaborador->descripcion);
-		}
-		indice = indice->siguiente;
-	}
+	archivo = fopen(infoColaborador->tipoArchivo, "a+");
+	fprintf(archivo,"%s\n", descripcion);
+	
+	printf("Se agrego la descripcion exitosamente");
 }
 
 void mostrarListaColaboradores(const ListaC *C, informacionColaborador *infoColaborador)
@@ -314,7 +333,7 @@ int tamano(ListaE *E)
 	return contador;
 }
 
-void insercionAristas(const ListaE *E, informacionEquipos *infoEquipos)
+void insercionColabEquipos(const ListaE *E, informacionEquipos *infoEquipos)
 {
 	FILE *archivo; 
 	int cantidadAristas;
@@ -373,6 +392,63 @@ void infoUnEquipo(ListaE *E, informacionEquipos *infoEquipos)
 	fclose(archivo);
 }
 
+void extraerListaEquipos(informacionEquipos *infoEquipos, string lista[])
+{	
+	int indice = 0;
+	while(indice < infoEquipos->tamano)
+	{
+		printf("%s ", lista[indice]);
+		if(strcmp(lista[indice], "Rachel") == 0)
+		{
+			printf("Si\n");
+		}
+		else
+		{
+			printf("No\n");
+		}
+		indice ++;
+	}
+}
+
+void extraerInfoTxt(informacionEquipos *infoEquipos)
+{
+	FILE *archivo = NULL; 
+	
+	string listaEquipos[100];
+	infoEquipos->tamano = 0;
+	int indice = 0;
+	char linea[300];
+	char *delimitador = "\n";
+	char *token = NULL;
+	
+	string ruta;
+	strcpy(ruta, ".\\InformacionEquipos\\Biblioteca");
+	
+	strcpy(infoEquipos->tipoArchivo, ruta);
+	strcat(infoEquipos->tipoArchivo, ".txt");
+	
+	archivo = fopen(infoEquipos->tipoArchivo, "a+");
+	
+	if(archivo)
+	{
+		while(fgets(linea, 300, archivo))
+		{
+   			token = strtok(linea, delimitador);
+   			while( token != NULL ) 
+			{
+      			printf("%s\n", token);
+      			strcpy(listaEquipos[indice], token);
+      			infoEquipos->tamano++;
+      			indice++;
+    
+      			token = strtok(NULL, delimitador);
+   			}
+		}
+		fclose(archivo);
+	}
+	extraerListaEquipos(infoEquipos, listaEquipos);
+}
+
 bool vacio()
 {
 	if(inicioG == NULL)
@@ -385,7 +461,36 @@ bool vacio()
 	}
 }
 
-void insertarArista(vertice *origen, vertice *destino);
+void insertarLugaresAdy(informacionEtiquetas infoEtiquetas);
+void insercionRutas(informacionEtiquetas *infoEtiquetas);
+
+void creacionEInsercionArchTxtD(const grafo *G, lugaresDeDomicilio *infoDomicilios)
+{
+	Nodo *indice;
+	FILE *archivo; 
+	string ruta;
+	strcpy(ruta, ".\\InformacionDomicilios\\");
+	
+	strcat(ruta, infoDomicilios->lugar);
+	strcpy(infoDomicilios->tipoArchivo, ruta);
+	strcat(infoDomicilios->tipoArchivo, ".txt");
+	
+	archivo = fopen(infoDomicilios->tipoArchivo, "a+");
+	fprintf(archivo,"%d; %s; %d\n", infoDomicilios->codigo, infoDomicilios->lugar, infoDomicilios->codigoPostal);
+}
+
+void insercionVerticesTxt(lugaresDeDomicilio *infoDomicilios)
+{
+	FILE *archivo; 
+	string ruta;
+	strcpy(ruta, ".\\InformacionDomicilios\\Lugares");
+	
+	strcpy(infoDomicilios->tipoArchivo, ruta);
+	strcat(infoDomicilios->tipoArchivo, ".txt");
+	
+	archivo = fopen(infoDomicilios->tipoArchivo, "a+");
+	fprintf(archivo,"%s\n", infoDomicilios->lugar);
+}
 
 void lecturaDatosDomicilio(lugaresDeDomicilio *infoDomicilios)
 {
@@ -402,7 +507,7 @@ void lecturaDatosDomicilio(lugaresDeDomicilio *infoDomicilios)
 		printf("\n");
 }	
 
-void insertarVertice(lugaresDeDomicilio infoDomicilios)
+void insertarDomicilios(grafo *G, lugaresDeDomicilio infoDomicilios)
 {
 	int contador = 0;
 	int cantidadDomicilios;
@@ -434,11 +539,73 @@ void insertarVertice(lugaresDeDomicilio infoDomicilios)
 			aux->siguiente = nuevo;
 		}
 		contador++;
+		creacionEInsercionArchTxtD(G, &infoDomicilios);
+		insercionVerticesTxt(&infoDomicilios);
+	}
+}
+
+void cargarListaDom(grafo *G, lugaresDeDomicilio *infoDomicilios, string nombre)
+{
+	vertice *nuevo = (vertice *)malloc(sizeof(vertice));
+	strcpy(nuevo->datosDomicilio.lugar, nombre);
+	nuevo->siguiente = NULL;
+	nuevo->ady = NULL;
+	
+	if(vacio())
+	{
+		inicioG = nuevo;
+	}
+	else
+	{
+		vertice *aux;
+		aux = inicioG;
+		while(aux->siguiente != NULL)
+		{
+			aux = aux->siguiente;
+		}
+		aux->siguiente = nuevo;
+	}
+}
+
+void extraerInfoTxtL(grafo *G, lugaresDeDomicilio *infoDomicilios)
+{
+	FILE *archivo = NULL; 
+	Nodo *n, *aux;
+	infoDomicilios->tamano = 0;
+	int indice = 0;
+	char linea[300];
+	char *delimitador = "\n";
+	char *token = NULL;
+	
+	string ruta;
+	strcpy(ruta, ".\\InformacionDomicilios\\Lugares");
+	
+	strcpy(infoDomicilios->tipoArchivo, ruta);
+	strcat(infoDomicilios->tipoArchivo, ".txt");
+	
+	archivo = fopen(infoDomicilios->tipoArchivo, "a+");
+	
+	if(archivo)
+	{
+		while(fgets(linea, 300, archivo))
+		{
+   			token = strtok(linea, delimitador);
+   			while( token != NULL ) 
+			{
+      			//printf("%s\n", token);
+      			cargarListaDom(G, infoDomicilios, token);
+      			infoDomicilios->tamano++;
+      			indice++;
+    
+      			token = strtok(NULL, delimitador);
+   			}
+		}
+		fclose(archivo);
 	}
 }
 
 vertice *getVertice(string nombre)
-{
+{	
 	vertice *aux;
 	aux = inicioG;
 
@@ -453,43 +620,103 @@ vertice *getVertice(string nombre)
 	return NULL;
 }
 
-void insertarArista(vertice *origen, vertice *destino)
+void insercionRutas(informacionEtiquetas *infoEtiquetas)
+{	
+	printf("Ingrese el lugar de origen: ");
+	gets(infoEtiquetas->origen);
+	
+	printf("Ingrese el lugar de destino: ");
+	gets(infoEtiquetas->destino);
+	
+	printf("Ingrese el tiempo estimado en minutos: ");
+	scanf("%d", &infoEtiquetas->tiempoEnMinutos);
+	
+	printf("Ingrese la distancia en kilometros: ");
+	scanf("%d", &infoEtiquetas->distancia);
+	getchar();
+	
+	printf("Ingrese el tipo de ruta (terrestre, aerea o maritima): ");
+	gets(infoEtiquetas->tipoRuta);
+	printf("\n");
+}
+
+void insertarLugaresAdy(informacionEtiquetas infoEtiquetas)
 {
-	arista *nueva = (arista *)malloc(sizeof(arista));
-	nueva->siguiente;
-	nueva->ady;
+	int cantRutas;
+	int contador = 0;
 	
-	arista *aux;
-	aux = origen->ady;
+	printf("¿Cuantas rutas desea agregar? ");
+	scanf("%d", &cantRutas);
+	getchar();
+	printf("\n");
 	
-	if(aux == NULL)
+	while(contador < cantRutas)
 	{
-		origen->ady = nueva;
-		nueva->ady = destino;
-	}
-	else
-	{
-		while(aux->siguiente != NULL)
+		insercionRutas(&infoEtiquetas);
+		
+		vertice *origen = getVertice(infoEtiquetas.origen);
+		vertice *destino = getVertice(infoEtiquetas.destino);
+		
+		arista *nueva = (arista *)malloc(sizeof(arista));
+		nueva->datosEtiquetas = infoEtiquetas;
+		nueva->siguiente = NULL;
+		nueva->ady = NULL;
+		
+		arista *aux;
+		aux = origen->ady;
+	
+		if(aux == NULL)
 		{
-			aux = aux->siguiente;
+			origen->ady = nueva;
+			nueva->ady = destino;
 		}
-		aux->siguiente = nueva;
-		nueva->ady = destino;
+		else
+		{
+			while(aux->siguiente != NULL)
+			{
+				aux = aux->siguiente;
+			}
+			aux->siguiente = nueva;
+			nueva->ady = destino;
+		}
+		contador++;
 	}
 }
 
-void insercionDomicilios()
+void listaAdyacencia(informacionEtiquetas *infoEtiquetas)
 {
-	string origen;
-	string destino;
+	printf("Lista de adyacencia");
+	FILE *archivo; 
+	vertice *vertAux;
+	arista *arisAux;
+	string ruta;
 	
-	printf("Ingrese el lugar de origen: ");
-	gets(origen);
+	vertAux = inicioG;
 	
-	printf("Ingrese el lugar de destino: ");
-	gets(destino);
-	
-	insertarArista(getVertice(origen), getVertice(destino));
+	while(vertAux != NULL)
+	{
+		printf("\n%s -> ", vertAux->nombre);
+		arisAux = vertAux->ady;
+		while(arisAux != NULL)
+		{
+			printf("%s -> ", arisAux->ady->datosDomicilio.lugar);
+			printf("%d ", arisAux->datosEtiquetas.tiempoEnMinutos);
+			printf("%d ", arisAux->datosEtiquetas.distancia);
+			printf("%s ", arisAux->datosEtiquetas.tipoRuta);
+			
+			strcpy(ruta, ".\\InformacionDomicilios\\");
+			strcat(ruta, vertAux->datosDomicilio.lugar);
+			strcpy(infoEtiquetas->tipoArchivo, ruta);
+			strcat(infoEtiquetas->tipoArchivo, ".txt");
+		
+			archivo = fopen(infoEtiquetas->tipoArchivo, "a+");
+			fprintf(archivo,"%s; %d; %d; %s\n", arisAux->ady->datosDomicilio.lugar, arisAux->datosEtiquetas.tiempoEnMinutos, arisAux->datosEtiquetas.distancia, arisAux->datosEtiquetas.tipoRuta);
+			
+			arisAux = arisAux->siguiente;
+		}
+		vertAux = vertAux->siguiente;
+		printf("\n");
+	}
 }
 
 int main()
@@ -502,20 +729,27 @@ int main()
 	E = listaEquipos();
 	informacionEquipos infoEq;
 	
+	grafo *G;
+	
 	lugaresDeDomicilio infoDom;
+	informacionEtiquetas infoE;
 	
     //insertarColaborador(C, infoCo);
     //mostrarListaColaboradores(C, &infoCo);
 	//registroBitacora(C, &infoCo);
     
     //insertarEquipo(E, infoEq);
-    //insercionAristas(E, &infoEq);
+    //insercionColabEquipos(E, &infoEq);
     //mostrarListaEquipos(E, &infoEq);
     //infoUnEquipo(E, &infoEq);
     //tamano(E);
     
-    //insertarVertice(infoDom);
-    //insercionDomicilios();
+    //insertarDomicilios(G, infoDom);
+    //extraerInfoTxtL(G, &infoDom);
+    //insertarLugaresAdy(infoE);
+    //listaAdyacencia(&infoE);
+    
+    //extraerInfoTxt(&infoEq);
     
     return 0;
 }
